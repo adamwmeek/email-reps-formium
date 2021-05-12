@@ -1,5 +1,5 @@
 """
-This script automates the contact form on Texas represenatives' websites.
+This script automates the contact form on Texas representatives' websites.
 It will pull the data to use from txt files or prompt the user if the files are not present.
 """
 
@@ -11,7 +11,7 @@ from selenium.webdriver.support.ui import Select
 import os
 
 USER_FILE_NAME = 'user_info.txt'
-ISSUE_FILE_NAME = 'SB_29.txt'
+ISSUE_FILE_NAME = 'HB_1399.txt'
 CONTACT_URLS_NAME = 'contacts.txt'
 
 prefix = ''
@@ -122,7 +122,7 @@ with webdriver.Firefox() as browser:
 
             # pause to see what we've done so far...
             pause_action = ActionChains(browser)
-            pause_action.pause(5)
+            pause_action.pause(1)
             pause_action.perform()
 
             # Send the message 
