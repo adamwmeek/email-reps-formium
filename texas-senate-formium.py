@@ -9,10 +9,11 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import Select
 
 import os
+import random
 
 USER_FILE_NAME = 'user_info.txt'
-ISSUE_FILE_NAME = 'HB_1399.txt'
-CONTACT_URLS_NAME = 'contacts.txt'
+ISSUE_FILE_NAME = 'HB6_SB7.txt'
+CONTACT_URLS_NAME = 'senate.txt'
 
 prefix = ''
 first_name = ''
@@ -39,6 +40,8 @@ if os.path.isfile(USER_FILE_NAME):
         state = contents[5].strip()
         zip_code = contents[6].strip()
         email_address = contents[7].strip()
+        phone_area = contents[8].strip()
+        phone_number = contents[9].strip()
 
 else:
 
@@ -50,6 +53,8 @@ else:
     state = input('State? ')
     zip_code = input('Zip code? ')
     email_address = input('Email address? ')
+    phone_area = input('Phone area code? ')
+    phone_number = input('Phone number? ')
 
     with open(USER_FILE_NAME, 'w') as user_info_file:
         user_info_file.write(prefix + '\n')
@@ -60,6 +65,8 @@ else:
         user_info_file.write(state + '\n')
         user_info_file.write(zip_code + '\n')
         user_info_file.write(email_address + '\n')
+        user_info_file.write(phone_area + '\n')
+        user_info_file.write(phone_number + '\n')
 
 if os.path.isfile(ISSUE_FILE_NAME):
 
@@ -78,52 +85,60 @@ else:
         issue_file.write(subject + '\n')
         issue_file.write(message)
 
+with open(CONTACT_URLS_NAME) as contact_urls_file:
+    contact_forms = contact_urls_file.readlines()
+
+random.shuffle(contact_forms)
+
 with webdriver.Firefox() as browser:
 
-    with open(CONTACT_URLS_NAME) as contact_urls_file:
-        contents = contact_urls_file.readlines()
+    for url in contact_forms:
 
-        for url in contents:
+        browser.get(url)
 
-            browser.get(url)
-            
-            # Prefix
-            prefix_select = Select(browser.find_element(By.NAME, 'prefix'))
-            all_ops = [o.get_attribute('value') for o in prefix_select.options]
-            prefix_select.select_by_value(prefix)
-            
-            # First name
-            browser.find_element(By.NAME, 'name_first').send_keys(first_name)
+        # Click email button
+        browser.find_element(By.ID, 'pgmenu_i1').click()
 
-            # Last name
-            browser.find_element(By.NAME, 'name_last').send_keys(last_name)
+        # Pause to wait for refresh
+        pause_action = ActionChains(browser)
+        pause_action.pause(2)
+        pause_action.perform()
 
-            # Address
-            browser.find_element(By.NAME, 'address').send_keys(address)
+        # Email
+        browser.find_element(By.NAME, 'sender').send_keys(email_address)
+        
+        # First name
+        browser.find_element(By.NAME, 'fname').send_keys(first_name)
 
-            # City
-            browser.find_element(By.NAME, 'city').send_keys(city)
+        # Last name
+        browser.find_element(By.NAME, 'lname').send_keys(last_name)
 
-            # State
-            browser.find_element(By.NAME, 'state').send_keys(state)
+        # Phone
+        browser.find_element(By.NAME, 'phone1').send_keys(phone_area)
+        browser.find_element(By.NAME, 'phone2').send_keys(phone_number)
 
-            # Zipcode
-            browser.find_element(By.NAME, 'zip').send_keys(zip_code)
+        # Address
+        browser.find_element(By.NAME, 'address1').send_keys(address)
 
-            # Email
-            browser.find_element(By.NAME, 'email').send_keys(email_address)
+        # City
+        browser.find_element(By.NAME, 'city').send_keys(city)
 
-            # Subject
-            subjects = browser.find_elements(By.NAME, 'subject')
-            subjects[1].send_keys(subject)
+        # State
+        browser.find_element(By.NAME, 'state').send_keys(state)
 
-            # Message
-            browser.find_element(By.NAME, 'message').send_keys(message)
+        # Zipcode
+        browser.find_element(By.NAME, 'zipcode').send_keys(zip_code)
 
-            # pause to see what we've done so far...
-            pause_action = ActionChains(browser)
-            pause_action.pause(1)
-            pause_action.perform()
+        # Subject
+        subjects = browser.find_element(By.NAME, 'subject').send_keys(subject)
 
-            # Send the message 
-            browser.find_element(By.NAME, 'Submit').click()
+        # Message
+        browser.find_element(By.NAME, 'message').send_keys(message)
+
+        # Send the message 
+        browser.find_element(By.CLASS_NAME, 'subm1').click()
+
+        # Slight timeout to prevent flooding
+        pause_action = ActionChains(browser)
+        pause_action.pause(5)
+        pause_action.perform()
